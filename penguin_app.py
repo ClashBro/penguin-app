@@ -54,8 +54,14 @@ rf_clf.fit(X_train, y_train)
 rf_clf_score = rf_clf.score(X_train, y_train)
 
 def prediction(model,island,bill_length_mm,bill_depth_mm,flipper_length_mm,body_mass_g,sex):
-	prediction = model(island,bill_length_mm,bill_depth_mm,flipper_length_mm,body_mass_g,sex)
-	score = model.score(island,bill_length_mm,bill_depth_mm,flipper_length_mm,body_mass_g,sex)
+	prediction = model.predict([[island,bill_length_mm,bill_depth_mm,flipper_length_mm,body_mass_g,sex]])
+	if prediction == 0:
+		prediction = 'Adelie'
+	elif prediction == 1:
+		prediction = 'Chinstrap'
+	else :
+		prediction = 'Gentoo'
+	score = model.score(X_train,y_train)
 	return prediction,score
 
 st.sidebar.title('Penguin Race Prediction')
@@ -64,10 +70,28 @@ b_d_m = st.sidebar.slider('Bill Depth(in mm',float(df['bill_depth_mm'].min()),fl
 f_l_m = st.sidebar.slider('Flipper Length(in mm)',float(df['flipper_length_mm'].min()),float(df['flipper_length_mm'].max()))
 b_m_g = st.sidebar.slider('Body Mass(in gram',float(df['body_mass_g'].min()),float(df['body_mass_g'].max()))
 sex = st.sidebar.selectbox('Sex',['Male','Female'])
+if sex == 'Male':
+	sex = 0
+else:
+	sex = 1
 island = st.sidebar.selectbox('Island',['Torgersen','Biscoe','Dream'])
-model = st.sidebar.selectbox('Select Model',[svc_model,log_reg,rf_clf])
+if island == 'Torgersen':
+	island = 2
+elif dream == 'Dream':
+	island = 1
+else :
+	island = 0
+model = st.sidebar.selectbox('Select Model',['SVC','Logistic Regression','Random Forrest Classifier'])
 
 if st.sidebar.button('Predict') == True:
-	prediction,score = prediction(model,island,b_l_m,b_d_m,f_l_m,b_m_g,sex)
-	st.write('Penguin race is ',prediction)
-	st.write('Score is ',score)
+	if model == 'Logistic Regression':
+		pred = prediction(log_reg,island,b_l_m,b_d_m,f_l_m,b_m_g,sex)
+		score = log_reg.score(X_train,y_train)
+	elif model == 'SVC':
+		pred = prediction(svc_model,island,b_l_m,b_d_m,f_l_m,b_m_g,sex)
+		score = svc_model.score(X_train,y_train)
+	else :
+		pred = prediction(rf_clf,island,b_l_m,b_d_m,f_l_m,b_m_g,sex)
+		score = rf_clf.score(X_train,y_train)
+	st.write('Predicted result : ',pred[0])
+	st.write('Score of Algorithm : ',score)
